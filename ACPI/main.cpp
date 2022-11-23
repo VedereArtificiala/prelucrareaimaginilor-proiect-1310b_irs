@@ -65,6 +65,7 @@ int main(int argc, char *argv[])
 
 	unsigned char* negated = negateImagee(img, w, h);
 	unsigned char* negated3 = negateImagee(img3, w3, h3);
+	unsigned char* prod = produs(img3, w3, h3,7);
 
 	/* afisam imaginea astfel obtinuta la dreapta celei initiale;
 	parametrii cu valorile 0, 1 semnifica prima linie, respectiv
@@ -72,6 +73,7 @@ int main(int argc, char *argv[])
 	*/
 	grid->addImage(negated, w, h, 0, 1, "Negativ");
 	grid->addImage(negated3, w, h, 0, 2, "Negativ_mama");
+	grid->addImage(prod, w, h, 1, 2, "zgomot");
 	///grid->addImage(contrast, w, h, 0, 2, "Contrast");
 
 	grid->show();
