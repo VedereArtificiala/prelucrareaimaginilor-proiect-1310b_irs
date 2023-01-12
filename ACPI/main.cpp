@@ -23,58 +23,71 @@ Shift+R - reseteaza toate imaginile la dimensiunile lor initiale
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-
-	/* generam o fereastra care va contine una sau mai multe imagini
-	   plasate sub forma unei matrici 2D */
 	ImageGrid *grid = new ImageGrid("Prelucrarea imaginilor");
 
+	///CITIRE POZA ORIGINALA
 	QString imageDir = "Images/";
 	QString imageFile(imageDir + "nadim_reye1.bmp");
-
-	/*adaugam prima imagine, cea initiala, citita din fisier,
-	in pozitia stanga-sus (linia 0, coloana 0)*/
 	grid->addImage(imageFile, 0, 0);
-
-	/* extragem imformatiile necesare din imagine:
-	dimensiunile ei si un sir de octeti care contine valorile
-	intensitatilor pentru fiecare pixel */
 	int w, h;
 	unsigned char* img = Tools::readImageGray8(imageFile, w, h);
-	///PIMP
+	
+	/*unsigned char* imageFileContrast = adjustContrastImage(img, w, h);
+	grid->addImage(imageFileContrast,w,h, 2, 1,"CONTRAST");
+	imageFileContrast = binarizareImage2(imageFileContrast, w, h);
+	grid->addImage(imageFileContrast, w, h, 2, 0, "CONTRAST");
+	*/
+	///CITIRE A DOUA POZA EU
 	QString imageFile2(imageDir + "nadim_reye2.bmp");
-	grid->addImage(imageFile2, 1, 0);
+	grid->addImage(imageFile2, 0, 1);
 	int w2, h2;
 	unsigned char* img2 = Tools::readImageGray8(imageFile2, w2, h2);
 
-	compareColors(img, img2, w, h, w2, h2);
+	///CITIRE POZA OCHI MAMA
 
 	QString imageFile3(imageDir + "mama_reye1.bmp");
-	grid->addImage(imageFile3, 1, 1);
+	grid->addImage(imageFile3, 0, 2);
 	int w3, h3;
 	unsigned char* img3 = Tools::readImageGray8(imageFile3, w3, h3);
-	compareColors(img, img3, w, h, w3, h3);
-	////PIMP
-	// exemplu de operatie: negativarea unei imagini 
+	
 
-	/*parcurgem imaginea pixel cu pixel si determinam valoarea complementara
-	pentru fiecare intensitate
 
-	se recomanda ca acest gen de operatie sa se implementeze intr-o functie
-	separata sau intr-o alta clasa
-	*/
+	
+	///Afisare poza cu masca(media aritmetica) si binarizare poza respectiva
+	
+	unsigned char* prod2 = adjustContrastImage(img2, w, h);
+	prod2 = produs(prod2, w3, h3, 7);
+	prod2 = binarizareImage2(prod2, w3, h3);
+	unsigned char* prodd2 = produs(img2, w3, h3, 5);
+	unsigned char* proddd2 = produs(img2, w3, h3, 5);
+	prodd2 = binarizarePupila(prodd2, w, h);
+	prod2 = SegmentareIris(prod2, prodd2, w, h);
+	grid->addImage(prod2, w, h, 1, 1, "segmentare-eu");
 
-	unsigned char* negated = negateImagee(img, w, h);
-	unsigned char* negated3 = negateImagee(img3, w3, h3);
-	unsigned char* prod = produs(img3, w3, h3,7);
+	
+	unsigned char* prod = adjustContrastImage(img, w, h);
+	prod = produs(prod, w3, h3, 7);
+	prod = binarizareImage2(prod, w3, h3);
+	unsigned char* prodd = produs(img, w3, h3, 5);
+	unsigned char* proddd = produs(img, w3, h3, 5);
+	prodd = binarizarePupila(prodd, w, h);
+	prod = SegmentareIris(prod, prodd, w, h);
+	grid->addImage(prod, w, h, 1, 0, "segmentare-eu2");
+	
+	unsigned char* prod3 = adjustContrastImage(img3, w, h);
+	prod3 = produs(prod3, w3, h3, 7);
+	prod3 = binarizareImage2(prod3, w3, h3);
+	unsigned char* prodd3 = produs(img3, w3, h3, 5);
+	unsigned char* proddd3 = produs(img3, w3, h3, 5);
+	prodd3 = binarizarePupila(prodd3, w, h);
+	prod3 = SegmentareIris(prod3, prodd3, w, h);
+	grid->addImage(prod3, w, h, 1, 2, "segmentare-mama");
 
-	/* afisam imaginea astfel obtinuta la dreapta celei initiale;
-	parametrii cu valorile 0, 1 semnifica prima linie, respectiv
-	a doua coloana a imageGrid-ului
-	*/
-	grid->addImage(negated, w, h, 0, 1, "Negativ");
-	grid->addImage(negated3, w, h, 0, 2, "Negativ_mama");
-	grid->addImage(prod, w, h, 1, 2, "zgomot");
-	///grid->addImage(contrast, w, h, 0, 2, "Contrast");
+	///TESTARE
+	compareColors(img, img2,prod,prod2,proddd,proddd2, w, h);
+	compareColors(img, img3,prod,prod3,proddd,proddd3, w, h);
+
+
 
 	grid->show();
 	
