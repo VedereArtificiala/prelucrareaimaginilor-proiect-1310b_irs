@@ -32,11 +32,6 @@ int main(int argc, char *argv[])
 	int w, h;
 	unsigned char* img = Tools::readImageGray8(imageFile, w, h);
 	
-	/*unsigned char* imageFileContrast = adjustContrastImage(img, w, h);
-	grid->addImage(imageFileContrast,w,h, 2, 1,"CONTRAST");
-	imageFileContrast = binarizareImage2(imageFileContrast, w, h);
-	grid->addImage(imageFileContrast, w, h, 2, 0, "CONTRAST");
-	*/
 	///CITIRE A DOUA POZA EU
 	QString imageFile2(imageDir + "nadim_reye2.bmp");
 	grid->addImage(imageFile2, 0, 1);
@@ -53,17 +48,7 @@ int main(int argc, char *argv[])
 
 
 	
-	///Afisare poza cu masca(media aritmetica) si binarizare poza respectiva
-	
-	unsigned char* prod2 = adjustContrastImage(img2, w, h);
-	prod2 = produs(prod2, w3, h3, 7);
-	prod2 = binarizareImage2(prod2, w3, h3);
-	unsigned char* prodd2 = produs(img2, w3, h3, 5);
-	unsigned char* proddd2 = produs(img2, w3, h3, 5);
-	prodd2 = binarizarePupila(prodd2, w, h);
-	prod2 = SegmentareIris(prod2, prodd2, w, h);
-	grid->addImage(prod2, w, h, 1, 1, "segmentare-eu");
-
+	///Afisare 
 	
 	unsigned char* prod = adjustContrastImage(img, w, h);
 	prod = produs(prod, w3, h3, 7);
@@ -72,7 +57,24 @@ int main(int argc, char *argv[])
 	unsigned char* proddd = produs(img, w3, h3, 5);
 	prodd = binarizarePupila(prodd, w, h);
 	prod = SegmentareIris(prod, prodd, w, h);
-	grid->addImage(prod, w, h, 1, 0, "segmentare-eu2");
+	grid->addImage(prod, w, h, 1, 0, "segmentare-eu");
+	unsigned char* segmentarecolor = SegmentareColor(img, prod, w, h);
+	grid->addImage(segmentarecolor, w, h, 2, 0, "segmentare-eu");
+
+
+
+
+	unsigned char* prod2 = adjustContrastImage(img2, w, h);
+	prod2 = produs(prod2, w3, h3, 7);
+	prod2 = binarizareImage2(prod2, w3, h3);
+	unsigned char* prodd2 = produs(img2, w3, h3, 5);
+	unsigned char* proddd2 = produs(img2, w3, h3, 5);
+	prodd2 = binarizarePupila(prodd2, w, h);
+	prod2 = SegmentareIris(prod2, prodd2, w, h);
+	grid->addImage(prod2, w, h, 1, 1, "segmentare-eu2");
+	unsigned char* segmentarecolor2 = SegmentareColor(img2, prod2, w, h);
+	grid->addImage(segmentarecolor2, w, h, 2, 1, "segmentare-eu2");
+
 	
 	unsigned char* prod3 = adjustContrastImage(img3, w, h);
 	prod3 = produs(prod3, w3, h3, 7);
@@ -82,6 +84,8 @@ int main(int argc, char *argv[])
 	prodd3 = binarizarePupila(prodd3, w, h);
 	prod3 = SegmentareIris(prod3, prodd3, w, h);
 	grid->addImage(prod3, w, h, 1, 2, "segmentare-mama");
+	unsigned char* segmentarecolor3 = SegmentareColor(img3, prod3, w, h);
+	grid->addImage(segmentarecolor3, w, h, 2, 2, "segmentare-mama");
 
 	///TESTARE
 	compareColors(img, img2,prod,prod2,proddd,proddd2, w, h);
