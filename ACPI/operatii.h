@@ -1,26 +1,17 @@
 #pragma once
 using namespace std;
 
-unsigned char* negateImage(unsigned char* img, int w, int h)
-{
-	unsigned char* result = new unsigned char[w * h];
-	for (int y = 0; y < h; y++)
-		for (int x = 0; x < w; x++)
-			result[y * w + x] = 255 - img[y * w + x];
-	return result;
-}
 
-unsigned char* binarizareImage(unsigned char* img, int w, int h)
+
+///PIMP
+
+unsigned char* SegmentareColor(unsigned char* img, unsigned char* img2, int w, int h)
 {
 	unsigned char* result = new unsigned char[w * h];
-	int a = 65;
 	for (int y = 0; y < h; y++)
 		for (int x = 0; x < w; x++)
-			result[y * w + x] =img[y * w + x];
-	for (int y = 110; y < h-110; y++)
-		for (int x = 190; x < w-190; x++)
-			if (img[y * w + x] < a)
-				result[y * w + x] = 0;
+			if (img2[y * w + x] == 0)
+				result[y * w + x] = img[y * w + x];
 			else
 				result[y * w + x] = 255;
 
@@ -28,37 +19,15 @@ unsigned char* binarizareImage(unsigned char* img, int w, int h)
 }
 
 
-unsigned char* adjustBrightnessImage(unsigned char* img, int w, int h, int brightnessLvl)
-{
-	unsigned char* result = new unsigned char[w * h];
-	for (int y = 0; y < h; y++)
-		for (int x = 0; x < w; x++)
-		{
-			if (brightnessLvl >= 0)
-			{
-				if (img[y * w + x] + brightnessLvl <= 255)
-					result[y * w + x] = img[y * w + x] + brightnessLvl;
-				else
-					result[y * w + x] = 255;
-			}
-			else
-			{
-				if (img[y * w + x] + brightnessLvl >= 0)
-					result[y * w + x] = img[y * w + x] + brightnessLvl;
-				else
-					result[y * w + x] = 0;
-			}
-		}
-	return result;
-}
+
 
 unsigned char* adjustContrastImage(unsigned char* img, int w, int h)
 {
 	float a, b, sa, sb;
-	a = 100;
-	b = 150;
-	sa = 70;
-	sb = 200;
+	a = 40;
+	b = 70;
+	sa = 40;
+	sb = 60;
 	unsigned char* result = new unsigned char[w * h];
 	for (int y = 0; y < h; y++)
 		for (int x = 0; x < w; x++)
@@ -76,6 +45,123 @@ unsigned char* adjustContrastImage(unsigned char* img, int w, int h)
 			}
 	return result;
 }
+
+
+
+unsigned char* binarizarePupila(unsigned char* img, int w, int h)
+{
+	///vector ce contine pozitiile cele mai din dreapta ale primilor pixeli negrii
+	int* extreme;
+	extreme = new int [h];
+	for (int i = 0; i < h; i++)
+		extreme[i] = 0;
+	unsigned char* result = new unsigned char[w * h];
+	int a = 40;
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			result[y * w + x] = img[y * w + x];
+	
+	//Binarizare imagine astfel incat ramane doar PUPILA
+	for (int y = 0; y < h ; y++)
+		for (int x = 0; x < w ; x++)
+			if (y > 130 && y < (h - 130) && x>210 && x < (w - 210))
+			{
+				if (img[y * w + x] < a)
+					result[y * w + x] = 0;
+				else
+					result[y * w + x] = 255;
+			}
+			else
+				result[y * w + x] = 255;
+	
+	
+	///umplere pupila cu negru (SCAPAM DE REFLEXIA DIN PUPILA!!)
+	int ok = 0;
+	for (int y = 0; y < h; y++)
+		for (int x = w-1; x >=0; x--)
+		{
+			if (result[y * w + x] == 0)
+			{
+				extreme[y] = x;
+				ok = 1;
+			}
+			if (ok)
+			{
+				ok = 0;
+				break;
+			}
+		}
+	ok = 0;
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+		{
+			if (extreme[y] == 0)
+				break;
+			if (result[y * w + x] == 0)
+			{
+				for (int i = x; i < extreme[y]; i++)
+				{
+					result[y * w + i] = 0;
+				}
+				ok = 1;
+			}
+			if (ok)
+			{
+				ok = 0;
+				break;
+			}
+		}
+			
+	return result;
+}
+
+
+
+
+unsigned char* binarizareImage2(unsigned char* img, int w, int h)
+{
+	unsigned char* result = new unsigned char[w * h];
+	int a = 53;
+	//int aa = 180;
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			result[y * w + x] = img[y * w + x];
+	for (int y = 0; y < h ; y++)
+		for (int x = 0; x < w ; x++)
+			if (y>110 && y<(h-110) && x>190 && x<(w-190))
+			{
+				if (img[y * w + x] < a)
+					result[y * w + x] = 0;
+				else
+					result[y * w + x] = 255;
+			}
+			else
+				result[y * w + x] = 255;
+
+				
+
+	return result;
+}
+
+
+unsigned char* SegmentareIris(unsigned char* img, unsigned char* img2, int w, int h)
+{
+	unsigned char* result = new unsigned char[w * h];
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			result[y * w + x] = img[y * w + x];
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+		{
+			if (img[y * w + x] == 0 && img2[y * w + x] == 0)
+			{
+				result[y * w + x] = 255;
+			}
+		}
+	return result;
+}
+
+
 
 unsigned char* produs(unsigned char* img, int w, int h, int dimensiune_masca)
 {
@@ -103,15 +189,17 @@ unsigned char* produs(unsigned char* img, int w, int h, int dimensiune_masca)
 
 				}
 
+
+
 	return result;
 }
 
-///PIMP
 
 
-void compareColors(unsigned char* img, unsigned char* img2, int w, int h, int w2, int h2)
+void compareColors(unsigned char* img, unsigned char* img2, unsigned char* seg1, unsigned char* seg2, unsigned char* masca1, unsigned char* masca2, int w, int h)
 {
 	double percentageColours = 0.0;
+	double percentageColours2 = 0.0;
 	double percentageTotalColours = 0.0;
 	double percentageDimensiune = 0.0;
 	int iris1Dim = 0, iris2Dim = 0;
@@ -120,68 +208,57 @@ void compareColors(unsigned char* img, unsigned char* img2, int w, int h, int w2
 	for (int y = 0; y < h; y++)
 		for (int x = 0; x < w; x++)
 			result[y * w + x] = img[y * w + x];
-	unsigned char* result2 = new unsigned char[w2 * h2];
-	for (int y = 0; y < h2; y++)
-		for (int x = 0; x < w2; x++)
-			result2[y * w2 + x] = img2[y * w2 + x];
+	unsigned char* result2 = new unsigned char[w * h];
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			result2[y * w + x] = img2[y * w + x];
 
-	int vfrecv[256], vfrecv2[256];
+	int vfrecv1[256], vfrecv22[256],vfrecv[256], vfrecv2[256];
 	///initializare vector frecv
 	for (int i = 0; i < 256; i++)
 	{
 		vfrecv[i] = 0;
 		vfrecv2[i] = 0;
+		vfrecv1[i] = 0;
+		vfrecv22[i] = 0;
 	}
-	///culorile prea albe devin alb si cele prea negre devin negru
-	for (int y = 110; y < h - 110; y++)
-		for (int x = 190; x < w - 190; x++)
-		{
-			if (result[y * w + x] < 50)
-				result[y * w + x] = 0;
-
-			if (result[y * w + x] > 125)
-				result[y * w + x] = 255;
-		}
-	for (int y = 110; y < h2 - 110; y++)
-		for (int x = 190; x < w2 - 190; x++)
-		{
-			if (result2[y * w2 + x] < 50)
-				result2[y * w2 + x] = 0;
-
-			if (result2[y * w2 + x] > 125)
-				result2[y * w2 + x] = 255;
-		}
+	
 	//numarare pixeli
-	//numara doar centrul pozei care contine irisul
-	for (int y = 110; y < h - 110; y++)
-		for (int x = 190; x < w-190; x++)
-		{
-			vfrecv[result[y * w + x]]++;
-		}
-	for (int y = 110; y < h2-110; y++)
-		for (int x = 190; x < w2-190; x++)
-		{
-			vfrecv2[result2[y * w2 + x]]++;
-		}
-		
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			if(seg1[y * w + x]==0)
+			{
+				vfrecv[masca1[y * w + x]]++;
+			}
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			if (seg2[y * w + x] == 0)
+			{
+				vfrecv2[masca2[y * w + x]]++;
+			}
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			if (seg1[y * w + x] == 0)
+			{
+				vfrecv1[result[y * w + x]]++;
+			}
+	for (int y = 0; y < h; y++)
+		for (int x = 0; x < w; x++)
+			if (seg2[y * w + x] == 0)
+			{
+				vfrecv22[result2[y * w + x]]++;
+			}
 
 	/// initializare variabila procentaj
-	for (int i = 5; i < 246; i++)
-	{
-		if (vfrecv[i] != 0)
-		{
-			percentageColours = (vfrecv2[i] * 100.0) / vfrecv[i];
-			///cout << percentageColours << endl;
-			break;
-		
-		}	
-	}
+
+	percentageColours = 100;
+
 
 	//suma pixeli si procentaj
-	for (int i = 5; i < 246; i++)
+	for (int i = 30; i < 220; i++)
 	{
 		///CAZUL CU 0!!!!!
-		if (vfrecv[i] != 0)
+		if (vfrecv[i] != 0 && vfrecv2[i] !=0)
 		{
 			if (((vfrecv2[i] * 100.0) / vfrecv[i]) > 100)
 			{
@@ -192,12 +269,7 @@ void compareColors(unsigned char* img, unsigned char* img2, int w, int h, int w2
 			{
 				percentageColours = (percentageColours + (vfrecv2[i] * 100.0) / vfrecv[i]) / 2;
 			}
-			//cout << percentageColours << "%" << endl;
 		}	
-		else if (vfrecv2[i] != 0 && vfrecv[i]==0)
-		{
-			percentageColours-=(int)percentageColours/2;
-		}
 		sum += vfrecv[i];
 		sum2 += vfrecv2[i];
 	}
@@ -210,57 +282,36 @@ void compareColors(unsigned char* img, unsigned char* img2, int w, int h, int w2
 		percentageTotalColours = (sum * 100.0) / sum2;
 	}
 
-	///Dimensiune iris
-	for (int y = 0; y < h ; y++)
-		for (int x = 0; x < w ; x++)
-		{
-			if (result[y * w + x] < 50)
-				result[y * w + x] = 0;
 
-			if (result[y * w + x] > 125)
-				result[y * w + x] = 255;
-		}
-	for (int y = 0; y < h2; y++)
-		for (int x = 0; x < w2; x++)
-		{
-			if (result2[y * w2 + x] < 50)
-				result2[y * w2 + x] = 0;
 
-			if (result2[y * w2 + x] > 125)
-				result2[y * w2 + x] = 255;
+	for (int i = 30; i < 220; i++)
+	{
+		///CAZUL CU 0!!!!!
+		if (vfrecv1[i] != 0 && vfrecv22[i] != 0)
+		{
+			if (((vfrecv22[i] * 100.0) / vfrecv1[i]) > 100)
+			{
+				percentageColours2 = percentageColours2 + (vfrecv1[i] * 100.0) / vfrecv22[i];
+				percentageColours2 = percentageColours2/ 2;
+			}
+			else
+			{
+				percentageColours2 = (percentageColours2 + (vfrecv22[i] * 100.0) / vfrecv1[i]) / 2;
+			}
 		}
-	for (int x = 320; x < w; x++)
-	{
-		if (result[240 * w + x] == 255)
-			break;
-		iris1Dim++;
-	}
-	for (int x = 320; x < w2; x++)
-	{
-		if (result2[240 * w2 + x] == 255)
-			break;
-		iris2Dim++;
-	}
-	if (iris1Dim > iris2Dim)
-	{
-		percentageDimensiune = (iris2Dim * 100.0) / iris1Dim;
-	}
-	else
-	{
-		percentageDimensiune = (iris1Dim * 100.0) / iris2Dim;
+
 	}
 
 
 	/// Afisare
 
 
-	cout << "Dimensiune iris1 respectiv iris2 : " << iris1Dim << " | " << iris2Dim << endl;
 	cout <<"Numar total pixeli iris poza1 respectiv poza 2 : " << sum << " | " << sum2 << endl;
 	cout << "Procentaj asemanare culori: " << percentageColours << "%" << endl;
+	cout << "Procentaj asemanare culori2: " << percentageColours2 << "%" << endl;
 	cout << "Procent asemanare numar total de pixeli din iris: " << percentageTotalColours << "%" << endl;
-	cout << "Procentaj Dimensiune iris : " << percentageDimensiune << "%" << endl;
 	
-	if (percentageColours >= 90.0 && percentageDimensiune >= 90.0 && percentageTotalColours >= 90.0)
+	if (percentageColours2 >= 50.0 && percentageColours >= 50.0 &&  percentageTotalColours >= 90.0)
 	{
 		cout << "ACELASI IRIS!" << endl;
 	}
@@ -292,16 +343,6 @@ unsigned char* negateImagee(unsigned char* img, int w, int h)
 			if (result[y * w + x] > 125)
 				result[y * w + x] = 255;
 		}
-/*	for (int y = 110; y < h - 110; y++)
-		for (int x = 190; x < w - 190; x++)
-		{
-			if (result2[y * w + x] < 50)
-				result2[y * w + x] = 0;
-
-			if (result2[y * w + x] > 205)
-				result2[y * w + x] = 255;
-		}
-		*/
 
 	return result;
 }
